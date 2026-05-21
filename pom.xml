@@ -21,6 +21,7 @@
     <modules>
         <module>demo1</module>
         <module>demo2</module>
+        <module>demo3</module>
     </modules>
 
     <properties>
@@ -40,6 +41,11 @@
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>9.7.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>3.5.19</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
