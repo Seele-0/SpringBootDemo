@@ -10,4 +10,7 @@ import java.util.List;
 public interface StudentMapper {
     @Select("select * from demosql.student")
     List<Student> getAllStudent();
+
+    @Select("select * from demosql.student where name like concat('%',#{name},'%')")
+    List<Student> getStudentByName(String name);
 }
