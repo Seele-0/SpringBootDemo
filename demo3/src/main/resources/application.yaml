@@ -3,8 +3,8 @@ spring:
     name: demo3
   datasource:
     url: jdbc:mysql://39.98.185.226:30002/javaweb
-    username: jk2023
-    password: Fang2003tong
+    username: ${DATA_BASE_USERNAME}
+    password: ${DATA_BASE_PASSWORLD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 mybatis:
