@@ -8,9 +8,9 @@ import java.util.List;
 
 @Mapper
 public interface StudentMapper {
-    @Select("select * from demosql.student")
+    @Select("select * from student")
     List<Student> getAllStudent();
 
-    @Select("select * from demosql.student where name like concat('%',#{name},'%')")
+    @Select("select * from student where name like concat('%',#{name},'%')")
     List<Student> getStudentByName(String name);
 }

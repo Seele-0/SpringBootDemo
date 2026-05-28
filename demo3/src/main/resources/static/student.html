@@ -89,9 +89,12 @@
             <tr>
                 <th>学号</th>
                 <th>姓名</th>
-                <th>班级</th>
                 <th>学院</th>
                 <th>专业</th>
+                <th>班级</th>
+                <th>入学年份</th>
+                <th>头像</th>
+                <th>备注</th>
             </tr>
         </thead>
         <tbody id="studentBody"></tbody>
@@ -101,11 +104,14 @@
     <script>
         function renderStudent(s) {
             return `
-                <td>${s.id}</td>
+                <td>${s.sno}</td>
                 <td>${s.name}</td>
-                <td>${s.className}</td>
                 <td>${s.college}</td>
                 <td>${s.major}</td>
+                <td>${s.className}</td>
+                <td>${s.registerYear}</td>
+                <td>${s.avatar}</td>
+                <td>${s.note}</td>
             `;
         }
 

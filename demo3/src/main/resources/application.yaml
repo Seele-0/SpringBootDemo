@@ -2,11 +2,12 @@ spring:
   application:
     name: demo3
   datasource:
-    url: jdbc:mysql://localhost:3306/demosql?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: mysql123
+    url: jdbc:mysql://39.98.185.226:30002/javaweb
+    username: jk2023
+    password: Fang2003tong
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
