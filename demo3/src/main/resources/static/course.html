@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>学生信息展示</title>
+    <title>课程信息展示</title>
     <style>
         body {
             font-family: "Microsoft YaHei", sans-serif;
@@ -28,14 +28,14 @@
             text-align: center;
         }
         th {
-            background-color: #409EFF;
+            background-color: #67C23A;
             color: #fff;
         }
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
         tr:hover {
-            background-color: #ecf5ff;
+            background-color: #f0f9eb;
         }
         .error {
             color: #f56c6c;
@@ -66,7 +66,7 @@
         }
         .search-box button {
             padding: 8px 16px;
-            background-color: #409EFF;
+            background-color: #67C23A;
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -75,74 +75,53 @@
             white-space: nowrap;
         }
         .search-box button:hover {
-            background-color: #66b1ff;
-        }
-        .search-box select {
-            padding: 8px 12px;
-            border: 1px solid #dcdfe6;
-            border-radius: 4px;
-            font-size: 14px;
-            background-color: #fff;
+            background-color: #85ce61;
         }
     </style>
 </head>
 <body>
-    <h1>学生信息列表</h1>
+    <h1>课程信息列表</h1>
     <div class="search-box">
-        <label for="searchSno">学号：</label>
-        <input type="text" id="searchSno" placeholder="请输入学号">
-        <label for="searchName">姓名：</label>
-        <input type="text" id="searchName" placeholder="请输入学生姓名">
-        <label for="searchClass">班级：</label>
-        <select id="searchClass">
-            <option value="">全部班级</option>
-            <option value="2023计算机科学与技术五">2023计算机科学与技术五</option>
-            <option value="2023计算机科学与技术六">2023计算机科学与技术六</option>
-        </select>
-        <button onclick="searchStudent()">查询</button>
+        <label for="searchCourseNo">课程编号：</label>
+        <input type="text" id="searchCourseNo" placeholder="请输入课程编号">
+        <label for="searchCourseName">课程名称：</label>
+        <input type="text" id="searchCourseName" placeholder="请输入课程名称">
+        <button onclick="searchCourse()">查询</button>
         <button onclick="clearSearch()" style="background-color: #909399;">清除</button>
     </div>
     <table>
         <thead>
             <tr>
-                <th>学号</th>
-                <th>姓名</th>
-                <th>学院</th>
-                <th>专业</th>
-                <th>班级</th>
-                <th>入学年份</th>
-                <th>头像</th>
+                <th>课程编号</th>
+                <th>课程名称</th>
+                <th>学时</th>
                 <th>备注</th>
             </tr>
         </thead>
-        <tbody id="studentBody"></tbody>
+        <tbody id="courseBody"></tbody>
     </table>
     <p class="error" id="error"></p>
 
     <script>
-        function renderStudent(s) {
+        function renderCourse(c) {
             return `
-                <td>${s.sno}</td>
-                <td>${s.name}</td>
-                <td>${s.college}</td>
-                <td>${s.major}</td>
-                <td>${s.className}</td>
-                <td>${s.registerYear}</td>
-                <td>${s.avatar}</td>
-                <td>${s.note}</td>
+                <td>${c.courseNo}</td>
+                <td>${c.courseName}</td>
+                <td>${c.classHours}</td>
+                <td>${c.note}</td>
             `;
         }
 
         function loadAll() {
             document.getElementById('error').textContent = '';
-            fetch('/students/show')
+            fetch('/course/show')
                 .then(response => response.json())
                 .then(data => {
-                    const tbody = document.getElementById('studentBody');
+                    const tbody = document.getElementById('courseBody');
                     tbody.innerHTML = '';
-                    data.forEach(s => {
+                    data.forEach(c => {
                         const row = document.createElement('tr');
-                        row.innerHTML = renderStudent(s);
+                        row.innerHTML = renderCourse(c);
                         tbody.appendChild(row);
                     });
                 })
@@ -152,38 +131,35 @@
         }
 
         function clearSearch() {
-            document.getElementById('searchSno').value = '';
-            document.getElementById('searchName').value = '';
-            document.getElementById('searchClass').value = '';
+            document.getElementById('searchCourseNo').value = '';
+            document.getElementById('searchCourseName').value = '';
             loadAll();
         }
 
-        function searchStudent() {
-            const sno = document.getElementById('searchSno').value.trim();
-            const name = document.getElementById('searchName').value.trim();
-            const className = document.getElementById('searchClass').value;
-            if (!sno && !name && !className) {
+        function searchCourse() {
+            const courseNo = document.getElementById('searchCourseNo').value.trim();
+            const courseName = document.getElementById('searchCourseName').value.trim();
+            if (!courseNo && !courseName) {
                 alert('请输入查询条件');
                 return;
             }
             document.getElementById('error').textContent = '';
             const params = new URLSearchParams();
-            if (sno) params.append('sno', sno);
-            if (name) params.append('name', name);
-            if (className) params.append('className', className);
-            fetch('/students/search?' + params.toString())
+            if (courseNo) params.append('courseNo', courseNo);
+            if (courseName) params.append('courseName', courseName);
+            fetch('/course/search?' + params.toString())
                 .then(response => response.json())
                 .then(data => {
-                    const tbody = document.getElementById('studentBody');
+                    const tbody = document.getElementById('courseBody');
                     tbody.innerHTML = '';
                     if (data && data.length > 0) {
-                        data.forEach(s => {
+                        data.forEach(c => {
                             const row = document.createElement('tr');
-                            row.innerHTML = renderStudent(s);
+                            row.innerHTML = renderCourse(c);
                             tbody.appendChild(row);
                         });
                     } else {
-                        document.getElementById('error').textContent = '未找到该学生';
+                        document.getElementById('error').textContent = '未找到该课程';
                     }
                 })
                 .catch(err => {

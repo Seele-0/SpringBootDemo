@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.demo3.mapper.CourseMapper">
+
+    <select id="getCourseByCondition" resultType="org.example.demo3.entity.Course">
+        select * from course
+        <where>
+            <if test="courseNo != null and courseNo != ''">
+                course_no like concat('%', #{courseNo}, '%')
+            </if>
+            <if test="courseName != null and courseName != ''">
+                and course_name like concat('%', #{courseName}, '%')
+            </if>
+        </where>
+    </select>
+
+</mapper>
