@@ -9,4 +9,6 @@ public interface CourseService {
     List<Course> getAllCourse();
 
     List<Course> getCourseByCondition(String courseNo, String courseName);
+
+    void addCourse(Course course);
 }

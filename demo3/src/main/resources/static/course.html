@@ -77,6 +77,131 @@
         .search-box button:hover {
             background-color: #85ce61;
         }
+        .add-btn {
+            margin-left: auto;
+            padding: 8px 20px;
+            background-color: #E6A23C;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .add-btn:hover {
+            background-color: #ebb563;
+        }
+        /* 模态框遮罩 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        /* 模态框 */
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 480px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .modal-header {
+            background-color: #67C23A;
+            color: #fff;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-header .close-btn:hover {
+            opacity: 0.8;
+        }
+        .modal-body {
+            padding: 24px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .form-group label {
+            width: 80px;
+            font-size: 14px;
+            color: #606266;
+            text-align: right;
+            margin-right: 12px;
+            white-space: nowrap;
+        }
+        .form-group input,
+        .form-group textarea {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #67C23A;
+            box-shadow: 0 0 0 2px rgba(103,194,58,0.2);
+        }
+        .form-group .required::before {
+            content: '*';
+            color: #f56c6c;
+            margin-right: 2px;
+        }
+        .modal-footer {
+            padding: 0 24px 24px;
+            text-align: right;
+        }
+        .modal-footer button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 12px;
+        }
+        .modal-footer .btn-submit {
+            background-color: #67C23A;
+            color: #fff;
+        }
+        .modal-footer .btn-submit:hover {
+            background-color: #85ce61;
+        }
+        .modal-footer .btn-cancel {
+            background-color: #f5f5f5;
+            color: #606266;
+        }
+        .modal-footer .btn-cancel:hover {
+            background-color: #e8e8e8;
+        }
     </style>
 </head>
 <body>
@@ -86,16 +211,50 @@
         <input type="text" id="searchCourseNo" placeholder="请输入课程编号">
         <label for="searchCourseName">课程名称：</label>
         <input type="text" id="searchCourseName" placeholder="请输入课程名称">
-        <button onclick="searchCourse()">查询</button>
-        <button onclick="clearSearch()" style="background-color: #909399;">清除</button>
+        <button type="button" onclick="searchCourse()">查询</button>
+        <button type="button" onclick="clearSearch()" style="background-color: #909399;">清除</button>
+        <button type="button" class="add-btn" onclick="openAddModal()">新增课程</button>
     </div>
+
+    <!-- 新增课程模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span>新增课程信息</span>
+                <button type="button" class="close-btn" onclick="closeAddModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="required" for="addCourseNo">课程编号：</label>
+                    <input type="text" id="addCourseNo" name="courseNo" placeholder="请输入课程编号">
+                </div>
+                <div class="form-group">
+                    <label class="required" for="addCourseName">课程名称：</label>
+                    <input type="text" id="addCourseName" name="courseName" placeholder="请输入课程名称">
+                </div>
+                <div class="form-group">
+                    <label for="addClassHours">学时：</label>
+                    <input type="number" id="addClassHours" name="classHours" placeholder="请输入学时">
+                </div>
+                <div class="form-group">
+                    <label for="addNote">备注：</label>
+                    <textarea id="addNote" name="note" placeholder="请输入备注信息"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeAddModal()">取消</button>
+                <button type="button" class="btn-submit" onclick="submitCourse()">确定</button>
+            </div>
+        </div>
+    </div>
+
     <table>
         <thead>
             <tr>
-                <th>课程编号</th>
-                <th>课程名称</th>
-                <th>学时</th>
-                <th>备注</th>
+                <th scope="col">课程编号</th>
+                <th scope="col">课程名称</th>
+                <th scope="col">学时</th>
+                <th scope="col">备注</th>
             </tr>
         </thead>
         <tbody id="courseBody"></tbody>
@@ -166,6 +325,71 @@
                     document.getElementById('error').textContent = '查询失败: ' + err;
                 });
         }
+
+        function openAddModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('addCourseNo').value = '';
+            document.getElementById('addCourseName').value = '';
+            document.getElementById('addClassHours').value = '';
+            document.getElementById('addNote').value = '';
+            document.getElementById('error').textContent = '';
+        }
+
+        function closeAddModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function submitCourse() {
+            const courseNo = document.getElementById('addCourseNo').value.trim();
+            const courseName = document.getElementById('addCourseName').value.trim();
+            const classHours = document.getElementById('addClassHours').value.trim();
+            const note = document.getElementById('addNote').value.trim();
+
+            if (!courseNo) {
+                alert('请输入课程编号');
+                return;
+            }
+            if (!courseName) {
+                alert('请输入课程名称');
+                return;
+            }
+
+            document.getElementById('error').textContent = '';
+
+            const params = new URLSearchParams();
+            params.append('courseNo', courseNo);
+            params.append('courseName', courseName);
+            if (classHours) params.append('classHours', classHours);
+            if (note) params.append('note', note);
+
+            fetch('/course/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params.toString()
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('新增课程成功');
+                    closeAddModal();
+                    loadAll();
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text || '新增失败');
+                    });
+                }
+            })
+            .catch(err => {
+                document.getElementById('error').textContent = '新增课程失败: ' + err.message;
+            });
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddModal();
+            }
+        });
 
         loadAll();
     </script>

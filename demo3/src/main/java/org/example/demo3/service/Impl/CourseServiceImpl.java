@@ -23,4 +23,14 @@ public class CourseServiceImpl implements CourseService {
     public List<Course> getCourseByCondition(String courseNo, String courseName) {
         return courseMapper.getCourseByCondition(courseNo, courseName);
     }
+
+    @Override
+    public void addCourse(Course course) {
+        //判断数据是否存在
+        List<Course> list = courseMapper.getCourseByCondition(course.getCourseNo(), course.getCourseName());
+        if(list != null && !list.isEmpty()){
+            throw new RuntimeException("课程已存在");
+        }
+        courseMapper.addCourse(course);
+    }
 }
