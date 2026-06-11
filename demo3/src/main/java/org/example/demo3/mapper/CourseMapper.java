@@ -17,9 +17,9 @@ public interface CourseMapper {
 
     List<Course> getCourseByCondition(@Param("courseNo") String courseNo, @Param("courseName") String courseName);
 
-    @Insert("insert into course(course_no, course_name, class_hours, note) values(#{course.courseNo}, #{course.courseName}, #{course.classHours}, #{course.note})")
-    void addCourse(@Param("course") Course course);
+    @Insert("insert into course(course_no, course_name, class_hours, note) values(#{courseNo}, #{courseName}, #{classHours}, #{note})")
+    void addCourse(Course course);
 
     @Delete("delete from course where course_no = #{courseNo}")
-    void deleteByCourseNo(@Param("courseNo") String courseNo);
+    void deleteByCourseNo(String courseNo);
 }
