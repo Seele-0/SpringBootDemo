@@ -1,6 +1,9 @@
 package org.example.demo3.service.Impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.example.demo3.entity.Course;
+import org.example.demo3.entity.PageResult;
 import org.example.demo3.mapper.CourseMapper;
 import org.example.demo3.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,17 @@ public class CourseServiceImpl implements CourseService {
             throw new RuntimeException("课程已存在");
         }
         courseMapper.addCourse(course);
+    }
+
+    @Override
+    public PageResult page(Integer page) {
+        int pageSize = 10;
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        PageHelper.startPage(page, pageSize);
+        Page<Course> courses = (Page<Course>) courseMapper.page();
+        return new PageResult(courses.getTotal(), courses.getResult());
     }
 
     @Override

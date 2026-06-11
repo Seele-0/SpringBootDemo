@@ -121,6 +121,9 @@
             justify-content: center;
             align-items: center;
         }
+        .modal-overlay.active {
+            display: flex;
+        }
 
         /* 模态框 */
         .modal {
@@ -217,6 +220,32 @@
         .modal-footer .btn-cancel:hover {
             background-color: #e8e8e8;
         }
+        .pagination {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #606266;
+        }
+        .pagination button {
+            padding: 8px 16px;
+            background-color: #67C23A;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .pagination button:hover:not(:disabled) {
+            background-color: #85ce61;
+        }
+        .pagination button:disabled {
+            background-color: #c0c4cc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -275,9 +304,18 @@
         </thead>
         <tbody id="courseBody"></tbody>
     </table>
+    <div class="pagination">
+        <button type="button" id="prevPageBtn" onclick="changePage(-1)">上一页</button>
+        <span id="pageInfo">第 1 页 / 共 1 页，共 0 条</span>
+        <button type="button" id="nextPageBtn" onclick="changePage(1)">下一页</button>
+    </div>
     <p class="error" id="error"></p>
 
     <script>
+        const pageSize = 10;
+        let currentPage = 1;
+        let totalPages = 1;
+
         function renderCourse(c) {
             return `
                 <td>${c.courseNo}</td>
@@ -288,28 +326,53 @@
             `;
         }
 
-        function loadAll() {
+        function loadAll(page = currentPage) {
             document.getElementById('error').textContent = '';
-            fetch('/course/show')
+            fetch('/course/page?page=' + page)
                 .then(response => response.json())
-                .then(data => {
+                .then(result => {
+                    if (result.code !== 1) {
+                        document.getElementById('error').textContent = result.msg || '加载数据失败';
+                        return;
+                    }
+
+                    const pageResult = result.data || { total: 0, records: [] };
+                    const records = pageResult.records || [];
+                    currentPage = page;
+                    totalPages = Math.max(1, Math.ceil(pageResult.total / pageSize));
+
                     const tbody = document.getElementById('courseBody');
                     tbody.innerHTML = '';
-                    data.forEach(c => {
+                    records.forEach(c => {
                         const row = document.createElement('tr');
                         row.innerHTML = renderCourse(c);
                         tbody.appendChild(row);
                     });
+                    updatePagination(pageResult.total);
                 })
                 .catch(err => {
                     document.getElementById('error').textContent = '加载数据失败: ' + err;
                 });
         }
 
+        function updatePagination(total) {
+            document.getElementById('pageInfo').textContent = '第 ' + currentPage + ' 页 / 共 ' + totalPages + ' 页，共 ' + total + ' 条';
+            document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+        }
+
+        function changePage(step) {
+            const targetPage = currentPage + step;
+            if (targetPage < 1 || targetPage > totalPages) {
+                return;
+            }
+            loadAll(targetPage);
+        }
+
         function clearSearch() {
             document.getElementById('searchCourseNo').value = '';
             document.getElementById('searchCourseName').value = '';
-            loadAll();
+            loadAll(1);
         }
 
         function searchCourse() {
@@ -390,7 +453,7 @@
                 if (response.ok) {
                     alert('新增课程成功');
                     closeAddModal();
-                    loadAll();
+                    loadAll(1);
                 } else {
                     return response.text().then(text => {
                         throw new Error(text || '新增失败');
@@ -428,7 +491,7 @@
             .then(data => {
                 if (data.code === 1) {
                     alert(data.data || '删除课程成功');
-                    loadAll();
+                    loadAll(currentPage);
                 } else {
                     document.getElementById('error').textContent = data.msg || '删除课程失败';
                 }
@@ -444,7 +507,7 @@
             }
         });
 
-        loadAll();
+        loadAll(1);
     </script>
 </body>
 </html>

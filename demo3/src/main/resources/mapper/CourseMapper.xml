@@ -15,4 +15,10 @@
         </where>
     </select>
 
+    <select id="page" resultType="org.example.demo3.entity.Course">
+        select * from course
+        <where>
+        </where>
+    </select>
+
 </mapper>

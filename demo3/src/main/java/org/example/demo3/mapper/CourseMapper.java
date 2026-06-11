@@ -20,6 +20,12 @@ public interface CourseMapper {
     @Insert("insert into course(course_no, course_name, class_hours, note) values(#{courseNo}, #{courseName}, #{classHours}, #{note})")
     void addCourse(Course course);
 
+    /**
+     * 分页查询
+     * @return
+     */
+    List<Course> page();
+
     @Delete("delete from course where course_no = #{courseNo}")
     int deleteByCourseNo(@Param("courseNo") String courseNo);
 }

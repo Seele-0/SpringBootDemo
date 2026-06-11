@@ -1,6 +1,7 @@
 package org.example.demo3.controllor;
 
 import org.example.demo3.entity.Course;
+import org.example.demo3.entity.PageResult;
 import org.example.demo3.entity.Result;
 import org.example.demo3.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,14 @@ public class CourseController {
     public List<Course> search(@RequestParam(required = false) String courseNo,
                                @RequestParam(required = false) String courseName) {
         return courseService.getCourseByCondition(courseNo, courseName);
+    }
+
+
+    @GetMapping("/page")
+    public Result<PageResult> page(@RequestParam(defaultValue = "1") Integer page)
+    {
+        PageResult pageResult = courseService.page(page);
+        return Result.success(pageResult);
     }
 
     @PostMapping("/add")
