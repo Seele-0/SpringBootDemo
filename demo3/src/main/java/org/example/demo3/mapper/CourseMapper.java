@@ -21,5 +21,5 @@ public interface CourseMapper {
     void addCourse(Course course);
 
     @Delete("delete from course where course_no = #{courseNo}")
-    void deleteByCourseNo(String courseNo);
+    int deleteByCourseNo(@Param("courseNo") String courseNo);
 }

@@ -91,6 +91,23 @@
         .add-btn:hover {
             background-color: #ebb563;
         }
+        .delete-btn {
+            padding: 6px 12px;
+            background-color: #F56C6C;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .operation-col {
+            white-space: nowrap;
+            width: 110px;
+        }
+        .delete-btn:hover {
+            background-color: #f78989;
+        }
         /* 模态框遮罩 */
         .modal-overlay {
             display: none;
@@ -104,9 +121,7 @@
             justify-content: center;
             align-items: center;
         }
-        .modal-overlay.active {
-            display: flex;
-        }
+
         /* 模态框 */
         .modal {
             background: #fff;
@@ -255,6 +270,7 @@
                 <th scope="col">课程名称</th>
                 <th scope="col">学时</th>
                 <th scope="col">备注</th>
+                <th scope="col" class="operation-col">操作</th>
             </tr>
         </thead>
         <tbody id="courseBody"></tbody>
@@ -268,6 +284,7 @@
                 <td>${c.courseName}</td>
                 <td>${c.classHours}</td>
                 <td>${c.note}</td>
+                <td class="operation-col"><button type="button" class="delete-btn" onclick="deleteCourse('${c.courseNo}')">删除课程</button></td>
             `;
         }
 
@@ -382,6 +399,42 @@
             })
             .catch(err => {
                 document.getElementById('error').textContent = '新增课程失败: ' + err.message;
+            });
+        }
+
+        function deleteCourse(courseNo) {
+            if (!courseNo) {
+                alert('课程编号不能为空');
+                return;
+            }
+
+            if (!confirm('确定要删除课程 ' + courseNo + ' 吗？')) {
+                return;
+            }
+
+            document.getElementById('error').textContent = '';
+
+            fetch('/course/delete?courseNo=' + encodeURIComponent(courseNo), {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || '删除失败');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.code === 1) {
+                    alert(data.data || '删除课程成功');
+                    loadAll();
+                } else {
+                    document.getElementById('error').textContent = data.msg || '删除课程失败';
+                }
+            })
+            .catch(err => {
+                document.getElementById('error').textContent = '删除课程失败: ' + err.message;
             });
         }
 

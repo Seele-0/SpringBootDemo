@@ -1,6 +1,7 @@
 package org.example.demo3.controllor;
 
 import org.example.demo3.entity.Course;
+import org.example.demo3.entity.Result;
 import org.example.demo3.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,5 +30,15 @@ public class CourseController {
     @PostMapping("/add")
     public void addCourse(Course course) {
         courseService.addCourse(course);
+    }
+
+    @DeleteMapping("/delete")
+    public Result<String> deleteCourse(@RequestParam(required = false) String courseNo) {
+        try {
+            courseService.deleteCourseByCourseNo(courseNo);
+            return Result.success("删除课程成功");
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
     }
 }

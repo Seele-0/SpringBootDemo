@@ -11,4 +11,6 @@ public interface CourseService {
     List<Course> getCourseByCondition(String courseNo, String courseName);
 
     void addCourse(Course course);
+
+    void deleteCourseByCourseNo(String courseNo);
 }

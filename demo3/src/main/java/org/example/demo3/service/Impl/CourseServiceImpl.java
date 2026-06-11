@@ -33,4 +33,15 @@ public class CourseServiceImpl implements CourseService {
         }
         courseMapper.addCourse(course);
     }
+
+    @Override
+    public void deleteCourseByCourseNo(String courseNo) {
+        if (courseNo == null || courseNo.trim().isEmpty()) {
+            throw new RuntimeException("课程编号不能为空");
+        }
+        int rows = courseMapper.deleteByCourseNo(courseNo);
+        if (rows == 0) {
+            throw new RuntimeException("课程不存在");
+        }
+    }
 }
