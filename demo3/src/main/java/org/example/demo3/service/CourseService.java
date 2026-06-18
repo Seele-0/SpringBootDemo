@@ -15,5 +15,5 @@ public interface CourseService {
 
     PageResult page(Integer page);
 
-    void deleteCourseByCourseNo(String courseNo);
+    void deleteCourseByCourseNos(List<String> courseNos);
 }

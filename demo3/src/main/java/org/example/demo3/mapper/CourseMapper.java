@@ -2,7 +2,6 @@ package org.example.demo3.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 import org.example.demo3.entity.Course;
@@ -26,6 +25,5 @@ public interface CourseMapper {
      */
     List<Course> page();
 
-    @Delete("delete from course where course_no = #{courseNo}")
-    int deleteByCourseNo(@Param("courseNo") String courseNo);
+    int deleteByCourseNos(@Param("courseNos") List<String> courseNos);
 }

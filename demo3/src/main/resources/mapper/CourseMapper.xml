@@ -21,4 +21,11 @@
         </where>
     </select>
 
+    <delete id="deleteByCourseNos">
+        delete from course where course_no in
+        <foreach collection="courseNos" item="courseNo" open="(" separator="," close=")">
+            #{courseNo}
+        </foreach>
+    </delete>
+
 </mapper>

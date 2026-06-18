@@ -42,9 +42,9 @@ public class CourseController {
     }
 
     @DeleteMapping("/delete")
-    public Result<String> deleteCourse(@RequestParam(required = false) String courseNo) {
+    public Result<String> deleteCourse(@RequestBody List<String> courseNos) {
         try {
-            courseService.deleteCourseByCourseNo(courseNo);
+            courseService.deleteCourseByCourseNos(courseNos);
             return Result.success("删除课程成功");
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());

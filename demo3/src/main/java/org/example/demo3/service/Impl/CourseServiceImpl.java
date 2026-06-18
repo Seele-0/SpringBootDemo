@@ -49,11 +49,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public void deleteCourseByCourseNo(String courseNo) {
-        if (courseNo == null || courseNo.trim().isEmpty()) {
-            throw new RuntimeException("课程编号不能为空");
+    public void deleteCourseByCourseNos(List<String> courseNos) {
+        if (courseNos == null || courseNos.isEmpty()) {
+            throw new RuntimeException("请选择要删除的课程");
         }
-        int rows = courseMapper.deleteByCourseNo(courseNo);
+        int rows = courseMapper.deleteByCourseNos(courseNos);
         if (rows == 0) {
             throw new RuntimeException("课程不存在");
         }

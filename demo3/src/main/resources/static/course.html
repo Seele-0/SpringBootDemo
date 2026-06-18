@@ -105,6 +105,13 @@
             white-space: nowrap;
             width: 110px;
         }
+        .batch-col {
+            display: none;
+            width: 40px;
+        }
+        .batch-col.active {
+            display: table-cell;
+        }
         .delete-btn:hover {
             background-color: #f78989;
         }
@@ -258,6 +265,8 @@
         <button type="button" onclick="searchCourse()">查询</button>
         <button type="button" onclick="clearSearch()" style="background-color: #909399;">清除</button>
         <button type="button" class="add-btn" onclick="openAddModal()">新增课程</button>
+        <button type="button" class="add-btn" style="background-color: #F56C6C;" id="batchDeleteBtn" onclick="handleBatchBtn()">批量删除</button>
+        <button type="button" class="add-btn" style="background-color: #909399; display: none;" id="cancelBatchBtn" onclick="toggleBatchMode()">取消</button>
     </div>
 
     <!-- 新增课程模态框 -->
@@ -295,6 +304,7 @@
     <table>
         <thead>
             <tr>
+                <th scope="col" class="batch-col"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
                 <th scope="col">课程编号</th>
                 <th scope="col">课程名称</th>
                 <th scope="col">学时</th>
@@ -315,9 +325,16 @@
         const pageSize = 10;
         let currentPage = 1;
         let totalPages = 1;
+        let batchMode = false;
+
+        function toggleSelectAll(selectAllCheckbox) {
+            const checkboxes = document.querySelectorAll('.course-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
+        }
 
         function renderCourse(c) {
             return `
+                <td class="batch-col"><input type="checkbox" class="course-checkbox" value="${c.courseNo}"></td>
                 <td>${c.courseNo}</td>
                 <td>${c.courseName}</td>
                 <td>${c.classHours}</td>
@@ -348,6 +365,9 @@
                         row.innerHTML = renderCourse(c);
                         tbody.appendChild(row);
                     });
+                    if (batchMode) {
+                        tbody.querySelectorAll('.batch-col').forEach(col => col.classList.add('active'));
+                    }
                     updatePagination(pageResult.total);
                 })
                 .catch(err => {
@@ -465,6 +485,40 @@
             });
         }
 
+        function deleteCourses(courseNos, successMsg, errorMsg, exitBatchMode = false) {
+            document.getElementById('error').textContent = '';
+
+            fetch('/course/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(courseNos)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || errorMsg);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.code === 1) {
+                    alert(data.data || successMsg);
+                    if (exitBatchMode) {
+                        toggleBatchMode();
+                    }
+                    loadAll(currentPage);
+                } else {
+                    document.getElementById('error').textContent = data.msg || errorMsg;
+                }
+            })
+            .catch(err => {
+                document.getElementById('error').textContent = errorMsg + ': ' + err.message;
+            });
+        }
+
         function deleteCourse(courseNo) {
             if (!courseNo) {
                 alert('课程编号不能为空');
@@ -475,30 +529,52 @@
                 return;
             }
 
-            document.getElementById('error').textContent = '';
+            deleteCourses([courseNo], '删除课程成功', '删除课程失败');
+        }
 
-            fetch('/course/delete?courseNo=' + encodeURIComponent(courseNo), {
-                method: 'DELETE'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(text || '删除失败');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.code === 1) {
-                    alert(data.data || '删除课程成功');
-                    loadAll(currentPage);
-                } else {
-                    document.getElementById('error').textContent = data.msg || '删除课程失败';
-                }
-            })
-            .catch(err => {
-                document.getElementById('error').textContent = '删除课程失败: ' + err.message;
-            });
+        function handleBatchBtn() {
+            if (batchMode) {
+                confirmDeleteBatch();
+            } else {
+                toggleBatchMode();
+            }
+        }
+
+        function toggleBatchMode() {
+            batchMode = !batchMode;
+            const btn = document.getElementById('batchDeleteBtn');
+            const cancelBtn = document.getElementById('cancelBatchBtn');
+            const cols = document.querySelectorAll('.batch-col');
+
+            if (batchMode) {
+                btn.textContent = '确认删除';
+                btn.style.backgroundColor = '#E6A23C';
+                cancelBtn.style.display = 'inline-block';
+                cols.forEach(col => col.classList.add('active'));
+            } else {
+                btn.textContent = '批量删除';
+                btn.style.backgroundColor = '#F56C6C';
+                cancelBtn.style.display = 'none';
+                cols.forEach(col => col.classList.remove('active'));
+                document.getElementById('selectAll').checked = false;
+                document.querySelectorAll('.course-checkbox').forEach(cb => cb.checked = false);
+            }
+        }
+
+        function confirmDeleteBatch() {
+            const checkboxes = document.querySelectorAll('.course-checkbox:checked');
+            const courseNos = Array.from(checkboxes).map(cb => cb.value);
+
+            if (courseNos.length === 0) {
+                alert('请先选择要删除的课程');
+                return;
+            }
+
+            if (!confirm('确定要删除选中的 ' + courseNos.length + ' 门课程吗？')) {
+                return;
+            }
+
+            deleteCourses(courseNos, '批量删除成功', '批量删除失败', true);
         }
 
         document.getElementById('modalOverlay').addEventListener('click', function(e) {
