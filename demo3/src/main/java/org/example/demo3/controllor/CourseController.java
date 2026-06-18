@@ -37,27 +37,20 @@ public class CourseController {
     }
 
     @PostMapping("/add")
-    public void addCourse(Course course) {
+    public Result<String> addCourse(Course course) {
         courseService.addCourse(course);
+        return Result.success("新增课程成功");
     }
 
     @PutMapping("/update")
     public Result<String> updateCourse(@RequestBody Course course) {
-        try {
-            courseService.updateCourse(course);
-            return Result.success("修改课程成功");
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
+        courseService.updateCourse(course);
+        return Result.success("修改课程成功");
     }
 
     @DeleteMapping("/delete")
     public Result<String> deleteCourse(@RequestBody List<String> courseNos) {
-        try {
-            courseService.deleteCourseByCourseNos(courseNos);
-            return Result.success("删除课程成功");
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
+        courseService.deleteCourseByCourseNos(courseNos);
+        return Result.success("删除课程成功");
     }
 }
