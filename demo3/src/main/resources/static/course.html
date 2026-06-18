@@ -2,588 +2,522 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>课程信息展示</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: "Microsoft YaHei", sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
-            background-color: #f5f5f5;
+            margin: 0;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa;
+            color: #303133;
         }
-        h1 {
-            color: #333;
+
+        #app {
+            min-height: 100vh;
+            padding: 40px 24px;
         }
-        table {
-            border-collapse: collapse;
-            width: 90%;
-            max-width: 1100px;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px 16px;
+
+        .page-header {
+            margin-bottom: 20px;
             text-align: center;
         }
-        th {
-            background-color: #67C23A;
-            color: #fff;
+
+        .page-header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #303133;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+
+        .toolbar-card {
+            margin-bottom: 16px;
         }
-        tr:hover {
-            background-color: #f0f9eb;
-        }
-        .error {
-            color: #f56c6c;
-            margin-top: 20px;
-        }
-        .search-box {
-            margin-bottom: 20px;
-            width: 90%;
-            max-width: 1100px;
+
+        .toolbar {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-form {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .action-buttons {
+            display: flex;
             gap: 8px;
             flex-wrap: nowrap;
         }
-        .search-box label {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: #606266;
-            white-space: nowrap;
-        }
-        .search-box input {
-            width: 160px;
-            padding: 8px 12px;
-            border: 1px solid #dcdfe6;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .search-box button {
-            padding: 8px 16px;
-            background-color: #67C23A;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-        .search-box button:hover {
-            background-color: #85ce61;
-        }
-        .add-btn {
-            margin-left: auto;
-            padding: 8px 20px;
-            background-color: #E6A23C;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-        .add-btn:hover {
-            background-color: #ebb563;
-        }
-        .delete-btn {
-            padding: 6px 12px;
-            background-color: #F56C6C;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-        .operation-col {
-            white-space: nowrap;
-            width: 110px;
-        }
-        .batch-col {
-            display: none;
-            width: 40px;
-        }
-        .batch-col.active {
-            display: table-cell;
-        }
-        .delete-btn:hover {
-            background-color: #f78989;
-        }
-        /* 模态框遮罩 */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-overlay.active {
-            display: flex;
+
+        .button-placeholder {
+            visibility: hidden;
+            pointer-events: none;
         }
 
-        /* 模态框 */
-        .modal {
-            background: #fff;
-            border-radius: 8px;
-            width: 480px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        .course-table:not(.batch-mode) .el-table-column--selection .cell {
+            visibility: hidden;
+        }
+
+        .table-card {
             overflow: hidden;
         }
-        .modal-header {
-            background-color: #67C23A;
-            color: #fff;
-            padding: 16px 24px;
-            font-size: 18px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+
+        .pagination-wrapper {
+            margin-top: 18px;
+            text-align: center;
         }
-        .modal-header .close-btn {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 22px;
-            cursor: pointer;
-            line-height: 1;
-        }
-        .modal-header .close-btn:hover {
-            opacity: 0.8;
-        }
-        .modal-body {
-            padding: 24px;
-        }
-        .form-group {
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-        }
-        .form-group label {
-            width: 80px;
-            font-size: 14px;
-            color: #606266;
-            text-align: right;
-            margin-right: 12px;
-            white-space: nowrap;
-        }
-        .form-group input,
-        .form-group textarea {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #dcdfe6;
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #67C23A;
-            box-shadow: 0 0 0 2px rgba(103,194,58,0.2);
-        }
-        .form-group .required::before {
-            content: '*';
-            color: #f56c6c;
-            margin-right: 2px;
-        }
-        .modal-footer {
-            padding: 0 24px 24px;
-            text-align: right;
-        }
-        .modal-footer button {
-            padding: 10px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-left: 12px;
-        }
-        .modal-footer .btn-submit {
-            background-color: #67C23A;
-            color: #fff;
-        }
-        .modal-footer .btn-submit:hover {
-            background-color: #85ce61;
-        }
-        .modal-footer .btn-cancel {
-            background-color: #f5f5f5;
-            color: #606266;
-        }
-        .modal-footer .btn-cancel:hover {
-            background-color: #e8e8e8;
-        }
-        .pagination {
-            margin-top: 16px;
-            display: flex;
-            align-items: center;
+
+        .pagination-wrapper .el-pagination {
             justify-content: center;
-            gap: 12px;
-            font-size: 14px;
-            color: #606266;
         }
-        .pagination button {
-            padding: 8px 16px;
-            background-color: #67C23A;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            white-space: nowrap;
+
+        .error-text {
+            margin-top: 16px;
+            color: #f56c6c;
+            text-align: center;
         }
-        .pagination button:hover:not(:disabled) {
-            background-color: #85ce61;
+
+        .course-dialog .el-input,
+        .course-dialog .el-input-number,
+        .course-dialog .el-textarea {
+            width: 100%;
         }
-        .pagination button:disabled {
-            background-color: #c0c4cc;
-            cursor: not-allowed;
+
+        .course-dialog .el-input-number .el-input__inner {
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            #app {
+                padding: 24px 12px;
+            }
+
+            .toolbar {
+                align-items: stretch;
+            }
+
+            .search-form,
+            .action-buttons,
+            .action-buttons .el-button {
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>课程信息列表</h1>
-    <div class="search-box">
-        <label for="searchCourseNo">课程编号：</label>
-        <input type="text" id="searchCourseNo" placeholder="请输入课程编号">
-        <label for="searchCourseName">课程名称：</label>
-        <input type="text" id="searchCourseName" placeholder="请输入课程名称">
-        <button type="button" onclick="searchCourse()">查询</button>
-        <button type="button" onclick="clearSearch()" style="background-color: #909399;">清除</button>
-        <button type="button" class="add-btn" onclick="openAddModal()">新增课程</button>
-        <button type="button" class="add-btn" style="background-color: #F56C6C;" id="batchDeleteBtn" onclick="handleBatchBtn()">批量删除</button>
-        <button type="button" class="add-btn" style="background-color: #909399; display: none;" id="cancelBatchBtn" onclick="toggleBatchMode()">取消</button>
-    </div>
-
-    <!-- 新增课程模态框 -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal">
-            <div class="modal-header">
-                <span>新增课程信息</span>
-                <button type="button" class="close-btn" onclick="closeAddModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="required" for="addCourseNo">课程编号：</label>
-                    <input type="text" id="addCourseNo" name="courseNo" placeholder="请输入课程编号">
-                </div>
-                <div class="form-group">
-                    <label class="required" for="addCourseName">课程名称：</label>
-                    <input type="text" id="addCourseName" name="courseName" placeholder="请输入课程名称">
-                </div>
-                <div class="form-group">
-                    <label for="addClassHours">学时：</label>
-                    <input type="number" id="addClassHours" name="classHours" placeholder="请输入学时">
-                </div>
-                <div class="form-group">
-                    <label for="addNote">备注：</label>
-                    <textarea id="addNote" name="note" placeholder="请输入备注信息"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeAddModal()">取消</button>
-                <button type="button" class="btn-submit" onclick="submitCourse()">确定</button>
-            </div>
+<div id="app">
+    <div class="page-container">
+        <div class="page-header">
+            <h1>课程信息列表</h1>
         </div>
+
+        <el-card class="toolbar-card" shadow="never">
+            <div class="toolbar">
+                <el-form class="search-form" :inline="true" :model="searchForm" label-width="82px">
+                    <el-form-item label="课程编号">
+                        <el-input
+                            v-model.trim="searchForm.courseNo"
+                            placeholder="请输入课程编号"
+                            clearable
+                            @keyup.enter="searchCourse">
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item label="课程名称">
+                        <el-input
+                            v-model.trim="searchForm.courseName"
+                            placeholder="请输入课程名称"
+                            clearable
+                            @keyup.enter="searchCourse">
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="success" :loading="loading" @click="searchCourse">查询</el-button>
+                        <el-button @click="clearSearch">清除</el-button>
+                    </el-form-item>
+                </el-form>
+
+                <div class="action-buttons">
+                    <el-button type="warning" @click="openAddDialog">新增课程</el-button>
+                    <el-button :type="batchMode ? 'warning' : 'danger'" @click="handleBatchBtn">
+                        {{ batchMode ? '确认删除' : '批量删除' }}
+                    </el-button>
+                    <el-button :class="{ 'button-placeholder': !batchMode }" @click="toggleBatchMode">取消</el-button>
+                </div>
+            </div>
+        </el-card>
+
+        <el-card class="table-card" shadow="never">
+            <el-table
+                v-loading="loading"
+                class="course-table"
+                :class="{ 'batch-mode': batchMode }"
+                :data="courses"
+                border
+                stripe
+                style="width: 100%"
+                empty-text="暂无课程数据"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" align="center"></el-table-column>
+                <el-table-column prop="courseNo" label="课程编号" min-width="140" align="center"></el-table-column>
+                <el-table-column prop="courseName" label="课程名称" min-width="160" align="center"></el-table-column>
+                <el-table-column prop="classHours" label="学时" width="100" align="center">
+                    <template #default="scope">
+                        {{ scope.row.classHours || '-' }}
+                    </template>
+                </el-table-column>
+                <el-table-column prop="note" label="备注" min-width="220" show-overflow-tooltip>
+                    <template #default="scope">
+                        {{ scope.row.note || '-' }}
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="120" align="center" fixed="right">
+                    <template #default="scope">
+                        <el-button type="danger" size="small" @click="deleteCourse(scope.row.courseNo)">删除课程</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <div class="pagination-wrapper" v-if="!searching">
+                <el-pagination
+                    background
+                    layout="prev, pager, next, total"
+                    :current-page="currentPage"
+                    :page-size="pageSize"
+                    :total="total"
+                    @current-change="loadAll">
+                </el-pagination>
+            </div>
+
+            <p v-if="error" class="error-text">{{ error }}</p>
+        </el-card>
+
+        <el-dialog
+            v-model="dialogVisible"
+            class="course-dialog"
+            title="新增课程信息"
+            width="480px"
+            :close-on-click-modal="false"
+            @closed="resetAddForm">
+            <el-form ref="addFormRef" :model="addForm" :rules="addRules" label-width="90px">
+                <el-form-item label="课程编号" prop="courseNo">
+                    <el-input v-model.trim="addForm.courseNo" placeholder="请输入课程编号"></el-input>
+                </el-form-item>
+                <el-form-item label="课程名称" prop="courseName">
+                    <el-input v-model.trim="addForm.courseName" placeholder="请输入课程名称"></el-input>
+                </el-form-item>
+                <el-form-item label="学时" prop="classHours">
+                    <el-input-number v-model="addForm.classHours" :min="0" :controls="false" placeholder="请输入学时"></el-input-number>
+                </el-form-item>
+                <el-form-item label="备注" prop="note">
+                    <el-input v-model.trim="addForm.note" type="textarea" :rows="3" placeholder="请输入备注信息"></el-input>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button @click="dialogVisible = false">取消</el-button>
+                <el-button type="success" :loading="submitLoading" @click="submitCourse">确定</el-button>
+            </template>
+        </el-dialog>
     </div>
+</div>
 
-    <table>
-        <thead>
-            <tr>
-                <th scope="col" class="batch-col"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                <th scope="col">课程编号</th>
-                <th scope="col">课程名称</th>
-                <th scope="col">学时</th>
-                <th scope="col">备注</th>
-                <th scope="col" class="operation-col">操作</th>
-            </tr>
-        </thead>
-        <tbody id="courseBody"></tbody>
-    </table>
-    <div class="pagination">
-        <button type="button" id="prevPageBtn" onclick="changePage(-1)">上一页</button>
-        <span id="pageInfo">第 1 页 / 共 1 页，共 0 条</span>
-        <button type="button" id="nextPageBtn" onclick="changePage(1)">下一页</button>
-    </div>
-    <p class="error" id="error"></p>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+<script>
+    const { createApp, ref, reactive, onMounted } = Vue;
+    const { ElMessage, ElMessageBox } = ElementPlus;
 
-    <script>
-        const pageSize = 10;
-        let currentPage = 1;
-        let totalPages = 1;
-        let batchMode = false;
+    createApp({
+        setup() {
+            const pageSize = 10;
+            const currentPage = ref(1);
+            const total = ref(0);
+            const courses = ref([]);
+            const selectedCourses = ref([]);
+            const loading = ref(false);
+            const submitLoading = ref(false);
+            const batchMode = ref(false);
+            const searching = ref(false);
+            const error = ref('');
+            const dialogVisible = ref(false);
+            const addFormRef = ref(null);
 
-        function toggleSelectAll(selectAllCheckbox) {
-            const checkboxes = document.querySelectorAll('.course-checkbox');
-            checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
-        }
+            const searchForm = reactive({
+                courseNo: '',
+                courseName: ''
+            });
 
-        function renderCourse(c) {
-            return `
-                <td class="batch-col"><input type="checkbox" class="course-checkbox" value="${c.courseNo}"></td>
-                <td>${c.courseNo}</td>
-                <td>${c.courseName}</td>
-                <td>${c.classHours}</td>
-                <td>${c.note}</td>
-                <td class="operation-col"><button type="button" class="delete-btn" onclick="deleteCourse('${c.courseNo}')">删除课程</button></td>
-            `;
-        }
+            const addForm = reactive({
+                courseNo: '',
+                courseName: '',
+                classHours: null,
+                note: ''
+            });
 
-        function loadAll(page = currentPage) {
-            document.getElementById('error').textContent = '';
-            fetch('/course/page?page=' + page)
-                .then(response => response.json())
-                .then(result => {
+            const addRules = {
+                courseNo: [{ required: true, message: '请输入课程编号', trigger: 'blur' }],
+                courseName: [{ required: true, message: '请输入课程名称', trigger: 'blur' }],
+                classHours: [{ required: true, message: '请输入学时', trigger: 'blur' }]
+            };
+
+            function setError(message) {
+                error.value = message || '';
+            }
+
+            async function loadAll(page = currentPage.value) {
+                loading.value = true;
+                searching.value = false;
+                setError('');
+                try {
+                    const response = await fetch('/course/page?page=' + page);
+                    const result = await response.json();
                     if (result.code !== 1) {
-                        document.getElementById('error').textContent = result.msg || '加载数据失败';
+                        setError(result.msg || '加载数据失败');
                         return;
                     }
 
                     const pageResult = result.data || { total: 0, records: [] };
-                    const records = pageResult.records || [];
-                    currentPage = page;
-                    totalPages = Math.max(1, Math.ceil(pageResult.total / pageSize));
+                    courses.value = pageResult.records || [];
+                    total.value = pageResult.total || 0;
+                    currentPage.value = page;
+                } catch (err) {
+                    setError('加载数据失败: ' + err.message);
+                } finally {
+                    loading.value = false;
+                }
+            }
 
-                    const tbody = document.getElementById('courseBody');
-                    tbody.innerHTML = '';
-                    records.forEach(c => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = renderCourse(c);
-                        tbody.appendChild(row);
-                    });
-                    if (batchMode) {
-                        tbody.querySelectorAll('.batch-col').forEach(col => col.classList.add('active'));
+            async function searchCourse() {
+                const courseNo = searchForm.courseNo.trim();
+                const courseName = searchForm.courseName.trim();
+                if (!courseNo && !courseName) {
+                    ElMessage.warning('请输入查询条件');
+                    return;
+                }
+
+                loading.value = true;
+                searching.value = true;
+                setError('');
+                try {
+                    const params = new URLSearchParams();
+                    if (courseNo) params.append('courseNo', courseNo);
+                    if (courseName) params.append('courseName', courseName);
+
+                    const response = await fetch('/course/search?' + params.toString());
+                    const data = await response.json();
+                    courses.value = Array.isArray(data) ? data : [];
+                    total.value = courses.value.length;
+                    currentPage.value = 1;
+
+                    if (courses.value.length === 0) {
+                        setError('未找到该课程');
                     }
-                    updatePagination(pageResult.total);
-                })
-                .catch(err => {
-                    document.getElementById('error').textContent = '加载数据失败: ' + err;
-                });
-        }
-
-        function updatePagination(total) {
-            document.getElementById('pageInfo').textContent = '第 ' + currentPage + ' 页 / 共 ' + totalPages + ' 页，共 ' + total + ' 条';
-            document.getElementById('prevPageBtn').disabled = currentPage <= 1;
-            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
-        }
-
-        function changePage(step) {
-            const targetPage = currentPage + step;
-            if (targetPage < 1 || targetPage > totalPages) {
-                return;
+                } catch (err) {
+                    setError('查询失败: ' + err.message);
+                } finally {
+                    loading.value = false;
+                }
             }
-            loadAll(targetPage);
-        }
 
-        function clearSearch() {
-            document.getElementById('searchCourseNo').value = '';
-            document.getElementById('searchCourseName').value = '';
-            loadAll(1);
-        }
-
-        function searchCourse() {
-            const courseNo = document.getElementById('searchCourseNo').value.trim();
-            const courseName = document.getElementById('searchCourseName').value.trim();
-            if (!courseNo && !courseName) {
-                alert('请输入查询条件');
-                return;
+            function clearSearch() {
+                searchForm.courseNo = '';
+                searchForm.courseName = '';
+                loadAll(1);
             }
-            document.getElementById('error').textContent = '';
-            const params = new URLSearchParams();
-            if (courseNo) params.append('courseNo', courseNo);
-            if (courseName) params.append('courseName', courseName);
-            fetch('/course/search?' + params.toString())
-                .then(response => response.json())
-                .then(data => {
-                    const tbody = document.getElementById('courseBody');
-                    tbody.innerHTML = '';
-                    if (data && data.length > 0) {
-                        data.forEach(c => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = renderCourse(c);
-                            tbody.appendChild(row);
+
+            function openAddDialog() {
+                setError('');
+                dialogVisible.value = true;
+            }
+
+            function resetAddForm() {
+                addForm.courseNo = '';
+                addForm.courseName = '';
+                addForm.classHours = null;
+                addForm.note = '';
+                if (addFormRef.value) {
+                    addFormRef.value.clearValidate();
+                }
+            }
+
+            async function submitCourse() {
+                if (!addFormRef.value) return;
+
+                await addFormRef.value.validate(async (valid) => {
+                    if (!valid) return;
+
+                    submitLoading.value = true;
+                    setError('');
+                    try {
+                        const params = new URLSearchParams();
+                        params.append('courseNo', addForm.courseNo.trim());
+                        params.append('courseName', addForm.courseName.trim());
+                        if (addForm.classHours !== null && addForm.classHours !== undefined && addForm.classHours !== '') {
+                            params.append('classHours', addForm.classHours);
+                        }
+                        if (addForm.note.trim()) {
+                            params.append('note', addForm.note.trim());
+                        }
+
+                        const response = await fetch('/course/add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: params.toString()
                         });
-                    } else {
-                        document.getElementById('error').textContent = '未找到该课程';
+
+                        if (!response.ok) {
+                            const text = await response.text();
+                            throw new Error(text || '新增失败');
+                        }
+
+                        ElMessage.success('新增课程成功');
+                        dialogVisible.value = false;
+                        await loadAll(1);
+                    } catch (err) {
+                        setError('新增课程失败: ' + err.message);
+                    } finally {
+                        submitLoading.value = false;
                     }
-                })
-                .catch(err => {
-                    document.getElementById('error').textContent = '查询失败: ' + err;
                 });
-        }
-
-        function openAddModal() {
-            document.getElementById('modalOverlay').classList.add('active');
-            document.getElementById('addCourseNo').value = '';
-            document.getElementById('addCourseName').value = '';
-            document.getElementById('addClassHours').value = '';
-            document.getElementById('addNote').value = '';
-            document.getElementById('error').textContent = '';
-        }
-
-        function closeAddModal() {
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-
-        function submitCourse() {
-            const courseNo = document.getElementById('addCourseNo').value.trim();
-            const courseName = document.getElementById('addCourseName').value.trim();
-            const classHours = document.getElementById('addClassHours').value.trim();
-            const note = document.getElementById('addNote').value.trim();
-
-            if (!courseNo) {
-                alert('请输入课程编号');
-                return;
-            }
-            if (!courseName) {
-                alert('请输入课程名称');
-                return;
             }
 
-            document.getElementById('error').textContent = '';
-
-            const params = new URLSearchParams();
-            params.append('courseNo', courseNo);
-            params.append('courseName', courseName);
-            if (classHours) params.append('classHours', classHours);
-            if (note) params.append('note', note);
-
-            fetch('/course/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: params.toString()
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('新增课程成功');
-                    closeAddModal();
-                    loadAll(1);
-                } else {
-                    return response.text().then(text => {
-                        throw new Error(text || '新增失败');
+            async function deleteCourses(courseNos, successMsg, errorMsg, exitBatchMode = false) {
+                setError('');
+                try {
+                    const response = await fetch('/course/delete', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(courseNos)
                     });
-                }
-            })
-            .catch(err => {
-                document.getElementById('error').textContent = '新增课程失败: ' + err.message;
-            });
-        }
 
-        function deleteCourses(courseNos, successMsg, errorMsg, exitBatchMode = false) {
-            document.getElementById('error').textContent = '';
-
-            fetch('/course/delete', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(courseNos)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
+                    if (!response.ok) {
+                        const text = await response.text();
                         throw new Error(text || errorMsg);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.code === 1) {
-                    alert(data.data || successMsg);
-                    if (exitBatchMode) {
-                        toggleBatchMode();
                     }
-                    loadAll(currentPage);
-                } else {
-                    document.getElementById('error').textContent = data.msg || errorMsg;
+
+                    const data = await response.json();
+                    if (data.code === 1) {
+                        ElMessage.success(data.data || successMsg);
+                        if (exitBatchMode) {
+                            batchMode.value = false;
+                            selectedCourses.value = [];
+                        }
+                        await loadAll(currentPage.value);
+                    } else {
+                        setError(data.msg || errorMsg);
+                    }
+                } catch (err) {
+                    setError(errorMsg + ': ' + err.message);
                 }
-            })
-            .catch(err => {
-                document.getElementById('error').textContent = errorMsg + ': ' + err.message;
+            }
+
+            async function deleteCourse(courseNo) {
+                if (!courseNo) {
+                    ElMessage.warning('课程编号不能为空');
+                    return;
+                }
+
+                try {
+                    await ElMessageBox.confirm('确定要删除课程 ' + courseNo + ' 吗？', '删除确认', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    });
+                    await deleteCourses([courseNo], '删除课程成功', '删除课程失败');
+                } catch (err) {
+                    if (err !== 'cancel') {
+                        setError('删除课程失败: ' + err.message);
+                    }
+                }
+            }
+
+            function handleSelectionChange(selection) {
+                selectedCourses.value = selection;
+            }
+
+            function toggleBatchMode() {
+                batchMode.value = !batchMode.value;
+                selectedCourses.value = [];
+            }
+
+            async function handleBatchBtn() {
+                if (!batchMode.value) {
+                    toggleBatchMode();
+                    return;
+                }
+
+                const courseNos = selectedCourses.value.map(course => course.courseNo);
+                if (courseNos.length === 0) {
+                    ElMessage.warning('请先选择要删除的课程');
+                    return;
+                }
+
+                try {
+                    await ElMessageBox.confirm('确定要删除选中的 ' + courseNos.length + ' 门课程吗？', '批量删除确认', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    });
+                    await deleteCourses(courseNos, '批量删除成功', '批量删除失败', true);
+                } catch (err) {
+                    if (err !== 'cancel') {
+                        setError('批量删除失败: ' + err.message);
+                    }
+                }
+            }
+
+            onMounted(() => {
+                loadAll(1);
             });
+
+            return {
+                pageSize,
+                currentPage,
+                total,
+                courses,
+                loading,
+                submitLoading,
+                batchMode,
+                searching,
+                error,
+                dialogVisible,
+                addFormRef,
+                searchForm,
+                addForm,
+                addRules,
+                loadAll,
+                searchCourse,
+                clearSearch,
+                openAddDialog,
+                resetAddForm,
+                submitCourse,
+                deleteCourse,
+                handleSelectionChange,
+                toggleBatchMode,
+                handleBatchBtn
+            };
         }
-
-        function deleteCourse(courseNo) {
-            if (!courseNo) {
-                alert('课程编号不能为空');
-                return;
-            }
-
-            if (!confirm('确定要删除课程 ' + courseNo + ' 吗？')) {
-                return;
-            }
-
-            deleteCourses([courseNo], '删除课程成功', '删除课程失败');
-        }
-
-        function handleBatchBtn() {
-            if (batchMode) {
-                confirmDeleteBatch();
-            } else {
-                toggleBatchMode();
-            }
-        }
-
-        function toggleBatchMode() {
-            batchMode = !batchMode;
-            const btn = document.getElementById('batchDeleteBtn');
-            const cancelBtn = document.getElementById('cancelBatchBtn');
-            const cols = document.querySelectorAll('.batch-col');
-
-            if (batchMode) {
-                btn.textContent = '确认删除';
-                btn.style.backgroundColor = '#E6A23C';
-                cancelBtn.style.display = 'inline-block';
-                cols.forEach(col => col.classList.add('active'));
-            } else {
-                btn.textContent = '批量删除';
-                btn.style.backgroundColor = '#F56C6C';
-                cancelBtn.style.display = 'none';
-                cols.forEach(col => col.classList.remove('active'));
-                document.getElementById('selectAll').checked = false;
-                document.querySelectorAll('.course-checkbox').forEach(cb => cb.checked = false);
-            }
-        }
-
-        function confirmDeleteBatch() {
-            const checkboxes = document.querySelectorAll('.course-checkbox:checked');
-            const courseNos = Array.from(checkboxes).map(cb => cb.value);
-
-            if (courseNos.length === 0) {
-                alert('请先选择要删除的课程');
-                return;
-            }
-
-            if (!confirm('确定要删除选中的 ' + courseNos.length + ' 门课程吗？')) {
-                return;
-            }
-
-            deleteCourses(courseNos, '批量删除成功', '批量删除失败', true);
-        }
-
-        document.getElementById('modalOverlay').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeAddModal();
-            }
-        });
-
-        loadAll(1);
-    </script>
+    }).use(ElementPlus).mount('#app');
+</script>
 </body>
 </html>
