@@ -13,6 +13,8 @@ public interface CourseService {
 
     void addCourse(Course course);
 
+    void updateCourse(Course course);
+
     PageResult page(Integer page);
 
     void deleteCourseByCourseNos(List<String> courseNos);

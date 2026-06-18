@@ -28,4 +28,12 @@
         </foreach>
     </delete>
 
+    <update id="updateCourse">
+        update course
+        set course_name = #{courseName},
+            class_hours = #{classHours},
+            note = #{note}
+        where course_no = #{courseNo}
+    </update>
+
 </mapper>

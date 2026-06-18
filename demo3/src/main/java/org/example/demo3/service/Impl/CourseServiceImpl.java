@@ -38,6 +38,23 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public void updateCourse(Course course) {
+        if (course == null || course.getCourseNo() == null || course.getCourseNo().isEmpty()) {
+            throw new RuntimeException("课程编号不能为空");
+        }
+        if (course.getCourseName() == null || course.getCourseName().isEmpty()) {
+            throw new RuntimeException("课程名称不能为空");
+        }
+        if (course.getClassHours() == null) {
+            throw new RuntimeException("学时不能为空");
+        }
+        int rows = courseMapper.updateCourse(course);
+        if (rows == 0) {
+            throw new RuntimeException("课程不存在");
+        }
+    }
+
+    @Override
     public PageResult page(Integer page) {
         int pageSize = 10;
         if (page == null || page < 1) {

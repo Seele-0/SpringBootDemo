@@ -41,6 +41,16 @@ public class CourseController {
         courseService.addCourse(course);
     }
 
+    @PutMapping("/update")
+    public Result<String> updateCourse(@RequestBody Course course) {
+        try {
+            courseService.updateCourse(course);
+            return Result.success("修改课程成功");
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/delete")
     public Result<String> deleteCourse(@RequestBody List<String> courseNos) {
         try {

@@ -56,9 +56,14 @@
             min-width: 280px;
         }
 
+        .search-form .el-form-item {
+            margin-bottom: 0;
+        }
+
         .action-buttons {
             display: flex;
-            gap: 8px;
+            align-items: center;
+            gap: 16px;
             flex-wrap: nowrap;
         }
 
@@ -154,7 +159,7 @@
                 </el-form>
 
                 <div class="action-buttons">
-                    <el-button type="warning" @click="openAddDialog">新增课程</el-button>
+                    <el-button type="success" @click="openAddDialog">新增课程</el-button>
                     <el-button :type="batchMode ? 'warning' : 'danger'" @click="handleBatchBtn">
                         {{ batchMode ? '确认删除' : '批量删除' }}
                     </el-button>
@@ -187,9 +192,10 @@
                         {{ scope.row.note || '-' }}
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="120" align="center" fixed="right">
+                <el-table-column label="操作" width="190" align="center" fixed="right">
                     <template #default="scope">
-                        <el-button type="danger" size="small" @click="deleteCourse(scope.row.courseNo)">删除课程</el-button>
+                        <el-button type="primary" size="small" @click="openEditDialog(scope.row)">编辑</el-button>
+                        <el-button type="danger" size="small" @click="deleteCourse(scope.row.courseNo)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -211,13 +217,13 @@
         <el-dialog
             v-model="dialogVisible"
             class="course-dialog"
-            title="新增课程信息"
+            :title="dialogMode === 'edit' ? '编辑课程信息' : '新增课程信息'"
             width="480px"
             :close-on-click-modal="false"
             @closed="resetAddForm">
             <el-form ref="addFormRef" :model="addForm" :rules="addRules" label-width="90px">
                 <el-form-item label="课程编号" prop="courseNo">
-                    <el-input v-model.trim="addForm.courseNo" placeholder="请输入课程编号"></el-input>
+                    <el-input v-model.trim="addForm.courseNo" :disabled="dialogMode === 'edit'" placeholder="请输入课程编号"></el-input>
                 </el-form-item>
                 <el-form-item label="课程名称" prop="courseName">
                     <el-input v-model.trim="addForm.courseName" placeholder="请输入课程名称"></el-input>
@@ -256,6 +262,7 @@
             const searching = ref(false);
             const error = ref('');
             const dialogVisible = ref(false);
+            const dialogMode = ref('add');
             const addFormRef = ref(null);
 
             const searchForm = reactive({
@@ -343,6 +350,17 @@
 
             function openAddDialog() {
                 setError('');
+                dialogMode.value = 'add';
+                dialogVisible.value = true;
+            }
+
+            function openEditDialog(row) {
+                setError('');
+                dialogMode.value = 'edit';
+                addForm.courseNo = row.courseNo || '';
+                addForm.courseName = row.courseName || '';
+                addForm.classHours = row.classHours ?? null;
+                addForm.note = row.note || '';
                 dialogVisible.value = true;
             }
 
@@ -351,6 +369,7 @@
                 addForm.courseName = '';
                 addForm.classHours = null;
                 addForm.note = '';
+                dialogMode.value = 'add';
                 if (addFormRef.value) {
                     addFormRef.value.clearValidate();
                 }
@@ -365,6 +384,40 @@
                     submitLoading.value = true;
                     setError('');
                     try {
+                        if (dialogMode.value === 'edit') {
+                            const response = await fetch('/course/update', {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    courseNo: addForm.courseNo.trim(),
+                                    courseName: addForm.courseName.trim(),
+                                    classHours: addForm.classHours,
+                                    note: addForm.note.trim()
+                                })
+                            });
+
+                            if (!response.ok) {
+                                const text = await response.text();
+                                throw new Error(text || '修改失败');
+                            }
+
+                            const data = await response.json();
+                            if (data.code === 1) {
+                                ElMessage.success(data.data || '修改课程成功');
+                                dialogVisible.value = false;
+                                if (searching.value) {
+                                    await searchCourse();
+                                } else {
+                                    await loadAll(currentPage.value);
+                                }
+                            } else {
+                                setError(data.msg || '修改课程失败');
+                            }
+                            return;
+                        }
+
                         const params = new URLSearchParams();
                         params.append('courseNo', addForm.courseNo.trim());
                         params.append('courseName', addForm.courseName.trim());
@@ -392,7 +445,7 @@
                         dialogVisible.value = false;
                         await loadAll(1);
                     } catch (err) {
-                        setError('新增课程失败: ' + err.message);
+                        setError((dialogMode.value === 'edit' ? '修改课程失败: ' : '新增课程失败: ') + err.message);
                     } finally {
                         submitLoading.value = false;
                     }
@@ -501,6 +554,7 @@
                 searching,
                 error,
                 dialogVisible,
+                dialogMode,
                 addFormRef,
                 searchForm,
                 addForm,
@@ -509,6 +563,7 @@
                 searchCourse,
                 clearSearch,
                 openAddDialog,
+                openEditDialog,
                 resetAddForm,
                 submitCourse,
                 deleteCourse,
